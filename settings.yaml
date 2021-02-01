@@ -1,0 +1,7 @@
+default:
+  stack_name: spot-price-instance
+  template_file: spot-instances.yaml
+  parameters:
+    InstanceType: t2.micro
+    ImageId: ami-0ce1e3f77cd41957e
+

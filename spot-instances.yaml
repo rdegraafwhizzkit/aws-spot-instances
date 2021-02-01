@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Spot Instances
+
+Parameters:
+  SpotPrice:
+    Type: String
+  InstanceType:
+    Type: String
+  KeyName:
+    Type: String
+  Subnet1Id:
+    Type: String
+  VpcId:
+    Type: String
+  HomeIp:
+    Type: String
+  CidrIp:
+    Type: String
+  ValidUntil:
+    Type: String
+  ImageId:
+    Type: String
+  UserData:
+    Type: String
+  IamFleetRole:
+    Type: String
+
+Conditions:
+  ShouldSetUserData: !Not [ !Equals [ !Ref UserData, '' ] ]
+
+Resources:
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+#  Role:
+#    Type: AWS::IAM::Role
+#    Properties:
+#      AssumeRolePolicyDocument:
+#        Version: 2012-10-17
+#        Statement:
+#          - Effect: Allow
+#            Principal:
+#              Service:
+#                - ec2.amazonaws.com
+#            Action:
+#              - 'sts:AssumeRole'
+#      Description: Spot Instances Role
+#      Policies:
+#        - PolicyName: spot-fleet-policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - "ec2:CancelSpotFleetRequests"
+#                  - "ec2:CreateTags"
+#                  - "ec2:DescribeSpotFleetInstances"
+#                  - "ec2:DescribeSpotFleetRequestHistory"
+#                  - "ec2:DescribeSpotFleetRequests"
+#                  - "ec2:ModifySpotFleetRequest"
+#                  - "ec2:RequestSpotFleet"
+#                  - "ec2:RunInstances"
+#                  - "iam:CreateServiceLinkedRole"
+#                  - "iam:ListInstanceProfiles"
+#                  - "iam:ListRoles"
+#                  - "iam:PassRole"
+#                Resource: '*'
+
+  # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-spotfleet.html
+  SpotFleet:
+    Type: AWS::EC2::SpotFleet
+    Properties:
+      # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata.html
+      SpotFleetRequestConfigData:
+        IamFleetRole: !Ref IamFleetRole
+        ExcessCapacityTerminationPolicy: default
+        # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata-launchspecifications.html
+        LaunchSpecifications:
+          - ImageId: !Ref ImageId
+            InstanceType: !Ref InstanceType
+            KeyName: !Ref KeyName
+            SecurityGroups:
+              - GroupId: !Ref SecurityGroup
+            SubnetId: !Ref Subnet1Id
+            UserData: !If [ ShouldSetUserData, !Ref UserData, !Ref AWS::NoValue ]
+        ReplaceUnhealthyInstances: false
+        SpotPrice: !Ref SpotPrice
+        TargetCapacity: 1
+        TerminateInstancesWithExpiration: true
+        Type: request
+        ValidUntil: !Ref ValidUntil
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Spot Fleet Security Group
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref HomeIp
+      - IpProtocol: tcp
+        FromPort: 8888
+        ToPort: 8888
+        CidrIp: !Ref CidrIp
+      VpcId: !Ref VpcId

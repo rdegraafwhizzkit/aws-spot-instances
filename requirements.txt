@@ -1,0 +1,3 @@
+dynaconf
+boto3
+requests
