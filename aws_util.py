@@ -1,5 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
+from datetime import datetime
+import re
 
 
 def get_wait_parameters(**kwargs):
@@ -7,7 +9,8 @@ def get_wait_parameters(**kwargs):
         k: v for k, v in kwargs.items() if k in (
             'StackName',
             'NextToken',
-            'WaiterConfig'
+            'WaiterConfig',
+            'ChangeSetName'
         )
     }
 
@@ -47,8 +50,55 @@ def get_create_stack_parameters(**kwargs):
     }
 
 
+def get_create_change_set_parameters(**kwargs):
+    return {
+        k: v for k, v in kwargs.items() if k in (
+            'StackName',
+            'TemplateBody',
+            'TemplateURL',
+            'UsePreviousTemplate',
+            'Parameters',
+            'Capabilities',
+            'ResourceTypes',
+            'RoleARN',
+            'RollbackConfiguration',
+            'NotificationARNs',
+            'Tags',
+            'ChangeSetName',
+            'ClientToken',
+            'Description',
+            'ChangeSetType',
+            'ResourcesToImport',
+            'IncludeNestedStacks'
+        )
+    }
+
+
 def get_client():
     return boto3.client('cloudformation')
+
+
+def create_stack_or_change_set(**kwargs):
+    if stack_exists(kwargs.get('StackName')):
+        return create_change_set(**kwargs)
+    else:
+        return create_stack(**kwargs)
+
+
+def create_change_set(**kwargs):
+    client = get_client()
+
+    kwargs['ChangeSetName'] = 'change-set-{}-{}'.format(
+        re.sub(r'[^a-zA-Z0-9-]', '-', kwargs.get('StackName')),
+        datetime.now().strftime('%Y%m%d-%H%M%S')
+    )
+
+    response = client.create_change_set(**get_create_change_set_parameters(**kwargs))
+
+    if kwargs.get('wait', False):
+        client.get_waiter('change_set_create_complete').wait(**get_wait_parameters(**kwargs))
+
+    return response
 
 
 def create_stack(**kwargs):

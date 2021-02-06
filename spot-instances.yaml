@@ -66,41 +66,41 @@ Resources:
 #                Resource: '*'
 
   # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-spotfleet.html
-  SpotFleet:
-    Type: AWS::EC2::SpotFleet
-    Properties:
-      # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata.html
-      SpotFleetRequestConfigData:
-        IamFleetRole: !Ref IamFleetRole
-        ExcessCapacityTerminationPolicy: default
-        # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata-launchspecifications.html
-        LaunchSpecifications:
-          - ImageId: !Ref ImageId
-            InstanceType: !Ref InstanceType
-            KeyName: !Ref KeyName
-            SecurityGroups:
-              - GroupId: !Ref SecurityGroup
-            SubnetId: !Ref Subnet1Id
-            UserData: !If [ ShouldSetUserData, !Ref UserData, !Ref AWS::NoValue ]
-        ReplaceUnhealthyInstances: false
-        SpotPrice: !Ref SpotPrice
-        TargetCapacity: 1
-        TerminateInstancesWithExpiration: true
-        Type: request
-        ValidUntil: !Ref ValidUntil
+#  SpotFleet:
+#    Type: AWS::EC2::SpotFleet
+#    Properties:
+#      # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata.html
+#      SpotFleetRequestConfigData:
+#        IamFleetRole: !Ref IamFleetRole
+#        ExcessCapacityTerminationPolicy: default
+#        # https://docs.amazonaws.cn/en_us/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-spotfleet-spotfleetrequestconfigdata-launchspecifications.html
+#        LaunchSpecifications:
+#          - ImageId: !Ref ImageId
+#            InstanceType: !Ref InstanceType
+#            KeyName: !Ref KeyName
+#            SecurityGroups:
+#              - GroupId: !Ref SecurityGroup
+#            SubnetId: !Ref Subnet1Id
+#            UserData: !If [ ShouldSetUserData, !Ref UserData, !Ref AWS::NoValue ]
+#        ReplaceUnhealthyInstances: false
+#        SpotPrice: !Ref SpotPrice
+#        TargetCapacity: 1
+#        TerminateInstancesWithExpiration: true
+#        Type: request
+#        ValidUntil: !Ref ValidUntil
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Spot Fleet Security Group
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Ref HomeIp
-      - IpProtocol: tcp
-        FromPort: 8888
-        ToPort: 8888
-        CidrIp: !Ref CidrIp
+#      SecurityGroupIngress:
+#      - IpProtocol: tcp
+#        FromPort: 22
+#        ToPort: 22
+#        CidrIp: !Ref HomeIp
+#      - IpProtocol: tcp
+#        FromPort: 8888
+#        ToPort: 8888
+#        CidrIp: !Ref CidrIp
       VpcId: !Ref VpcId

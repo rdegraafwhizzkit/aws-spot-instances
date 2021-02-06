@@ -3,7 +3,7 @@ from pprint import pprint as pp
 from datetime import datetime, timedelta
 from requests import get
 import base64
-from aws_util import create_stack, create_parameter_dict, create_tag_dict
+from aws_util import create_stack_or_change_set, create_parameter_dict, create_tag_dict
 
 settings = Dynaconf(
     env='dt',
@@ -13,7 +13,7 @@ settings = Dynaconf(
 
 parameters = create_parameter_dict(settings.parameters)
 tags = create_tag_dict(settings.get('tags', {}))
-pp(tags)
+
 parameters.extend([
     {
         'ParameterKey': 'ValidUntil',
@@ -37,11 +37,9 @@ if '' != user_data:
         }
     ])
 
-pp(parameters)
-
 with open(settings.template_file, 'r') as f:
     template_body = ''.join(f.readlines())
-    if False: pp(create_stack(
+    pp(create_stack_or_change_set(
         StackName=settings.stack_name,
         Parameters=parameters,
         TemplateBody=template_body,
